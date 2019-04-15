@@ -9,19 +9,23 @@
 # SVN $URL$
 #===============================================================================
 
-NC_CONFIG = nf-config
-LIBDIR = $(shell $(NC_CONFIG) --prefix)/lib
-INCDIR = $(shell $(NC_CONFIG) --prefix)/include
+# NC_CONFIG = nf-config
+ifndef LIBDIR
+LIBDIR = -L$(shell $(NC_CONFIG) --libdir) -L$(shell $(NF_CONFIG) --prefix)/lib
+endif
+ifndef INCDIR
+INCDIR = -I$(shell $(NC_CONFIG) --includedir) -I$(shell $(NF_CONFIG) --includedir) 
+endif
 SRCDIR  = .
 PREFIX  = /usr/local
 
 COMPILE = gfortran
 FLAGS = -g -fdefault-real-8 -ffixed-form -O2 -fPIC
 LIB  =  $(shell $(NC_CONFIG) --flibs)
-INCLUDE = -I$(INCDIR)
+INCLUDE = $(INCDIR)
 F2PY = f2py
-F2PY_LIB = -L${LIBDIR} -lnetcdf -lnetcdff -lhdf5 -lhdf5_hl
-F2PY_INCLUDE = -I${INCDIR}
+F2PY_LIB = ${LIBDIR} -lnetcdf -lnetcdff -lhdf5 -lhdf5_hl
+F2PY_INCLUDE = ${INCDIR}
 F2PY_F90_FLAG= '-g -fdefault-real-8 -ffixed-form -O2 -fPIC'
 
 OBJSET  = \

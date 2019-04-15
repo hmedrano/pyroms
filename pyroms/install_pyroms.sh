@@ -1,15 +1,23 @@
 #!/bin/sh
 
-#DESTDIR=/usr/local
-DESTDIR=$HOME/python
-PYROMS_PATH=$DESTDIR/lib/python3.6/site-packages/pyroms
+# Define this paths to fit your architecture
+#export NC_CONFIG=/usr/bin/nc-config
+#export NF_CONFIG=/usr/bin/nf-config
+# OR
+export LIBDIR="-I/usr/include -I/usr/include/hdf5/serial"
+export INCDIR="-L/usr/lib/x86_64-linux-gnu -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lnetcdf -lhdf5_hl -lhdf5 -lpthread -lsz -lz -ldl -lm -lcurl"
+
+# Make sure you have CONDA_PREFIX, activate your environment
+DESTDIR=$CONDA_PREFIX
+PYROMS_PATH=$DESTDIR/lib/python?.?/site-packages/pyroms
+
 CURDIR=`pwd`
 
 echo
 echo "installing pyroms..."
 echo
 python setup.py build --fcompiler=gnu95;
-python setup.py install --prefix=$DESTDIR
+python setup.py install 
 echo "installing external libraries..."
 echo "installing gridgen..."
 cd $CURDIR/external/nn
@@ -34,12 +42,13 @@ make install
 cp libgridgen.so $PYROMS_PATH
 echo "installing scrip..."
 cd $CURDIR/external/scrip/source
-perl -pe "s#\/usr\/local#$DESTDIR#" makefile > makefile2
+sed "s~^PREFIX.*$~PREFIX = $DESTDIR~g" makefile > makefile2
 make -f makefile2
 make -f makefile2 f2py
 make -f makefile2 install
-+# Write it this way for Darwin...
+# Write it this way for Darwin...
 cp -r scrip*.so* $PYROMS_PATH
+cp $CURDIR/pyroms/gridid.txt $PYROMS_PATH/gridid.txt
 cd $CURDIR
 echo
 echo "Done installing pyroms..."
@@ -50,6 +59,5 @@ echo "use, ..."
 echo "Please set the environment variable PYROMS_GRIDID_FILE"
 echo "to point to your gridid file. A gridid file template"
 echo "is available here:"
-echo "$CURDIR/pyroms/gridid.txt"
-read -p "Press any key to continue or Ctrl+C to quit this install"
-echo
+echo "$PYROMS_PATH/gridid.txt"
+echo ""
